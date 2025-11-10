@@ -1,6 +1,7 @@
 export const now = () => Date.now();
 
-export const isBrowser = () => typeof window !== "undefined" && typeof document !== "undefined";
+export const isBrowser = () =>
+  typeof window !== "undefined" && typeof document !== "undefined";
 
 export function safeJSONParse<T>(s: string | null): T | null {
   if (!s) return null;
@@ -14,8 +15,17 @@ export function safeJSONParse<T>(s: string | null): T | null {
 export function stableStringifyInit(init?: RequestInit): string {
   if (!init) return "";
   // Only include stable primitives likely to affect result identity.
-  const { method, headers, body, mode, credentials, cache, redirect, referrer, referrerPolicy } =
-    init;
+  const {
+    method,
+    headers,
+    body,
+    mode,
+    credentials,
+    cache,
+    redirect,
+    referrer,
+    referrerPolicy,
+  } = init;
   let headersObj: Record<string, string> | undefined = undefined;
   if (headers && typeof Headers !== "undefined" && headers instanceof Headers) {
     headersObj = {};
@@ -42,7 +52,7 @@ export function stableStringifyInit(init?: RequestInit): string {
     cache,
     redirect,
     referrer,
-    referrerPolicy
+    referrerPolicy,
   });
 }
 

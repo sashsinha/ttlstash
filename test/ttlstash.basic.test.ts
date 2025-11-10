@@ -8,7 +8,10 @@ describe("ttlstash basic", () => {
   });
 
   it("stores and returns fresh value", async () => {
-    const val = await ttlstash("prefs", { ttl: 1000, fetcher: async () => ({ a: 1 }) });
+    const val = await ttlstash("prefs", {
+      ttl: 1000,
+      fetcher: async () => ({ a: 1 }),
+    });
     expect(val).toEqual({ a: 1 });
     const meta = getMeta("prefs");
     expect(meta?.fresh).toBe(true);
@@ -21,12 +24,15 @@ describe("ttlstash basic", () => {
     const v1 = await ttlstash("k", {
       ttl: 100,
       revalidate: true,
-      fetcher: () => Promise.resolve(++i)
+      fetcher: () => Promise.resolve(++i),
     });
     expect(v1).toBe(1);
     await Promise.resolve();
     vi.advanceTimersByTime(0);
-    const v2 = await ttlstash("k", { ttl: 100, fetcher: () => Promise.resolve(++i) });
+    const v2 = await ttlstash("k", {
+      ttl: 100,
+      fetcher: () => Promise.resolve(++i),
+    });
     expect(v2).toBe(2);
   });
 
@@ -34,7 +40,11 @@ describe("ttlstash basic", () => {
     let i = 0;
     await ttlstash("k2", { ttl: 50, fetcher: () => ++i });
     vi.advanceTimersByTime(60);
-    const v = await ttlstash("k2", { ttl: 50, revalidate: false, fetcher: () => ++i });
+    const v = await ttlstash("k2", {
+      ttl: 50,
+      revalidate: false,
+      fetcher: () => ++i,
+    });
     expect(v).toBe(2);
   });
 

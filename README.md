@@ -116,16 +116,24 @@ ttlstash.invalidate("custom/key");
 
 - `npm run lint` – `prettier --check .`
 - `npm run format` – `prettier --write .`
+- `npm run changeset` – capture a changelog entry (pick semver bump) for the next release.
+- `npm run version-packages` – apply pending changesets, bump versions, and update `CHANGELOG.md`.
+- `npm run release` – build and publish via Changesets (`changeset publish`).
 - `npm run build` – Bundles `dist/` via `tsup`.
 - `npm test` / `npm run test:watch` – Runs the Vitest suite in `jsdom`.
 - `npm run prepublishOnly` – Ensures lint, build, and tests pass before publishing.
+
+## CI & automation
+
+- `.github/workflows/main.yml` – Runs lint/test/build on pushes and PRs against `main` using Node 18/20.
+- `.github/workflows/publish.yml` – Uses Changesets to either open a release PR or publish to npm once changes land on `main` (requires `NPM_TOKEN` secret).
 
 ## Release checklist
 
 1. `npm run format && npm run lint`
 2. `npm test`
-3. `npm run build`
-4. `npm version <patch|minor|major>`
-5. `npm publish --access public`
+3. `npm run changeset` (document each releasable change)
+4. `npm run version-packages` (updates versions + changelog)
+5. `npm run release` (builds and publishes via `changeset publish`)
 
 Happy caching!

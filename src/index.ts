@@ -1,7 +1,11 @@
 import type { Entry, FetchOptions, StashOptions } from "./types";
 import { now, keyForUrl } from "./utils";
 import { readJSON, writeJSON, remove } from "./storage";
-import { notifyInvalidate, notifySet, subscribe as _subscribe } from "./broadcast";
+import {
+  notifyInvalidate,
+  notifySet,
+  subscribe as _subscribe,
+} from "./broadcast";
 
 const SCHEMA_VERSION = 1;
 
@@ -9,10 +13,14 @@ const SCHEMA_VERSION = 1;
  * Returns Cached Value If Fresh. If Stale And Revalidate=true, Returns Stale Immediately And Refreshes In Background.
  * If Nothing Cached, Resolves With fetcher() Result And Stores It With TTL.
  */
-export async function ttlstash<T>(key: string, options: StashOptions<T>): Promise<T> {
+export async function ttlstash<T>(
+  key: string,
+  options: StashOptions<T>,
+): Promise<T> {
   const { ttl, fetcher } = options;
   const revalidate = options.revalidate ?? true;
-  if (!Number.isFinite(ttl) || ttl <= 0) throw new Error("ttl must be > 0 (ms)");
+  if (!Number.isFinite(ttl) || ttl <= 0)
+    throw new Error("ttl must be > 0 (ms)");
   if (typeof fetcher !== "function") throw new Error("fetcher is required");
 
   const entry = readJSON<Entry<T>>(key);
@@ -28,7 +36,12 @@ export async function ttlstash<T>(key: string, options: StashOptions<T>): Promis
     queueMicrotask(async () => {
       try {
         const value = await Promise.resolve(fetcher());
-        const next: Entry<T> = { v: SCHEMA_VERSION, value, createdAt: now(), expires: now() + ttl };
+        const next: Entry<T> = {
+          v: SCHEMA_VERSION,
+          value,
+          createdAt: now(),
+          expires: now() + ttl,
+        };
         writeJSON(key, next);
         notifySet(key);
       } catch {
@@ -40,14 +53,22 @@ export async function ttlstash<T>(key: string, options: StashOptions<T>): Promis
 
   // Cold Or Strict Freshness.
   const value = await Promise.resolve(fetcher());
-  const next: Entry<T> = { v: SCHEMA_VERSION, value, createdAt: now(), expires: now() + ttl };
+  const next: Entry<T> = {
+    v: SCHEMA_VERSION,
+    value,
+    createdAt: now(),
+    expires: now() + ttl,
+  };
   writeJSON(key, next);
   notifySet(key);
   return value;
 }
 
 /** Helper Around fetch() That Caches By URL Plus Selected Init Fields. */
-export async function ttlstashFetch(url: string, opts: FetchOptions): Promise<unknown> {
+export async function ttlstashFetch(
+  url: string,
+  opts: FetchOptions,
+): Promise<unknown> {
   const { ttl, init, revalidate = true, parser } = opts;
   const key = keyForUrl(url, init);
   return ttlstash(key, {
@@ -60,7 +81,7 @@ export async function ttlstashFetch(url: string, opts: FetchOptions): Promise<un
       const ct = res.headers.get("content-type") || "";
       if (ct.includes("application/json")) return res.json();
       return res.text();
-    }
+    },
   });
 }
 
@@ -77,8 +98,17 @@ export const subscribe = _subscribe;
 export function getMeta(key: string) {
   const e = readJSON<Entry>(key);
   if (!e) return null;
-  return { createdAt: e.createdAt, expires: e.expires, fresh: e.expires > now() };
+  return {
+    createdAt: e.createdAt,
+    expires: e.expires,
+    fresh: e.expires > now(),
+  };
 }
 
 /** Default Export With Helpers For JS Consumers. */
-export default Object.assign(ttlstash, { fetch: ttlstashFetch, invalidate, subscribe, getMeta });
+export default Object.assign(ttlstash, {
+  fetch: ttlstashFetch,
+  invalidate,
+  subscribe,
+  getMeta,
+});

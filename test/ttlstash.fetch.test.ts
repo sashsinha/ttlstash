@@ -27,8 +27,8 @@ describe("ttlstashFetch", () => {
   it("caches JSON by URL+init", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ ok: true }), {
-        headers: { "content-type": "application/json" }
-      })
+        headers: { "content-type": "application/json" },
+      }),
     );
 
     const first = await ttlstashFetch("/api", { ttl: 1000 });
@@ -41,7 +41,7 @@ describe("ttlstashFetch", () => {
 
   it("falls back to text", async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response("hello", { headers: { "content-type": "text/plain" } })
+      new Response("hello", { headers: { "content-type": "text/plain" } }),
     );
 
     const value = await ttlstashFetch("/t", { ttl: 1000 });
@@ -51,14 +51,18 @@ describe("ttlstashFetch", () => {
 
   it("revalidates after TTL", async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ n: 1 }), { headers: { "content-type": "application/json" } })
+      new Response(JSON.stringify({ n: 1 }), {
+        headers: { "content-type": "application/json" },
+      }),
     );
     await ttlstashFetch("/n", { ttl: 50 });
 
     await vi.advanceTimersByTimeAsync(60);
 
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ n: 2 }), { headers: { "content-type": "application/json" } })
+      new Response(JSON.stringify({ n: 2 }), {
+        headers: { "content-type": "application/json" },
+      }),
     );
     const stale = await ttlstashFetch("/n", { ttl: 50, revalidate: true });
 

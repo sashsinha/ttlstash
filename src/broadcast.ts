@@ -10,7 +10,7 @@ export function subscribe(fn: Subscriber): () => void {
 }
 
 function emit(msg: { type: "set" | "invalidate"; key: string }) {
-  subs.forEach(s => {
+  subs.forEach((s) => {
     try {
       s(msg);
     } catch {
@@ -27,14 +27,19 @@ let bc: BroadcastChannel | null = null;
   try {
     if ("BroadcastChannel" in window) {
       bc = new BroadcastChannel("ttlstash");
-      bc.onmessage = e => {
+      bc.onmessage = (e) => {
         const data = e?.data;
-        if (data && typeof data === "object" && "type" in data && "key" in data) {
+        if (
+          data &&
+          typeof data === "object" &&
+          "type" in data &&
+          "key" in data
+        ) {
           emit(data);
         }
       };
     }
-    window.addEventListener("storage", e => {
+    window.addEventListener("storage", (e) => {
       if (!e.key) return;
       if (e.key.startsWith("ttlstash::") || e.key.startsWith("ttlstash/")) {
         emit({ type: "set", key: e.key });

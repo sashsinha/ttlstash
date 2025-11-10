@@ -23,7 +23,10 @@ export interface Entry<V = unknown> {
   createdAt: Milliseconds;
 }
 
-export type Subscriber = (message: { type: "set" | "invalidate"; key: string }) => void;
+export type Subscriber = (message: {
+  type: "set" | "invalidate";
+  key: string;
+}) => void;
 
 export interface StorageLike {
   getItem(k: string): string | null;
